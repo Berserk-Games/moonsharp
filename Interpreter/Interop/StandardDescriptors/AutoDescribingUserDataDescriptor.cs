@@ -91,10 +91,10 @@ namespace MoonSharp.Interpreter
 
 		/// <summary>
 		/// Gets a "meta" operation on this userdata. If a descriptor does not support this functionality,
-		/// it should return "null" (not a nil). 
+		/// it should return "null" (not a nil).
 		/// These standard metamethods can be supported (the return value should be a function accepting the
 		/// classic parameters of the corresponding metamethod):
-		/// __add, __sub, __mul, __div, __div, __pow, __unm, __eq, __lt, __le, __lt, __len, __concat, 
+		/// __add, __sub, __mul, __div, __div, __pow, __unm, __eq, __lt, __le, __lt, __len, __concat,
 		/// __pairs, __ipairs, __iterator, __call
 		/// These standard metamethods are supported through other calls for efficiency:
 		/// __index, __newindex, __tostring
@@ -116,7 +116,7 @@ namespace MoonSharp.Interpreter
 
 		/// <summary>
 		/// Determines whether the specified object is compatible with the specified type.
-		/// Unless a very specific behaviour is needed, the correct implementation is a 
+		/// Unless a very specific behaviour is needed, the correct implementation is a
 		/// simple " return type.IsInstanceOfType(obj); "
 		/// </summary>
 		/// <param name="type">The type.</param>

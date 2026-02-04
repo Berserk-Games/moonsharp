@@ -8,7 +8,7 @@ using System.Text;
 namespace MoonSharp.Interpreter.CoreLib
 {
 	/// <summary>
-	/// Class implementing table Lua functions 
+	/// Class implementing table Lua functions
 	/// </summary>
 	[MoonSharpModule(Namespace = "table")]
 	public class TableModule
@@ -197,9 +197,9 @@ namespace MoonSharp.Interpreter.CoreLib
 
 
 		//table.concat (list [, sep [, i [, j]]])
-		//Given a list where all elements are strings or numbers, returns the string list[i]..sep..list[i+1] (...) sep..list[j]. 
-		//The default value for sep is the empty string, the default for i is 1, and the default for j is #list. If i is greater 
-		//than j, returns the empty string. 
+		//Given a list where all elements are strings or numbers, returns the string list[i]..sep..list[i+1] (...) sep..list[j].
+		//The default value for sep is the empty string, the default for i is 1, and the default for j is #list. If i is greater
+		//than j, returns the empty string.
 		[MoonSharpModuleMethod]
 		public static DynValue concat(ScriptExecutionContext executionContext, CallbackArguments args)
 		{
@@ -211,13 +211,13 @@ namespace MoonSharp.Interpreter.CoreLib
 			Table list = vlist.Table;
 			string sep = vsep.IsNil() ? "" : vsep.String;
 			int start = vstart.IsNilOrNan() ? 1 : (int)vstart.Number;
-			int end; 
+			int end;
 
 			if (vend.IsNilOrNan())
 			{
 				end = GetTableLength(executionContext, vlist);
 			}
-			else 
+			else
 			{
 				end = (int)vend.Number;
 			}
@@ -238,7 +238,7 @@ namespace MoonSharp.Interpreter.CoreLib
 
 				if (i != start)
 					sb.Append(sep);
-				
+
 				sb.Append(s);
 
 			}
