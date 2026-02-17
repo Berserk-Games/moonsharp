@@ -356,7 +356,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 			}
 		}
 
-		internal List<WatchItem> Debugger_GetCallStack(SourceRef startingRef)
+		internal List<WatchItem> Debugger_GetCallStack(SourceRef startingRef, bool addressRelativeToBase = false)
 		{
 			List<WatchItem> wis = new List<WatchItem>();
 
@@ -364,9 +364,9 @@ namespace MoonSharp.Interpreter.Execution.VM
 			{
 				var c = m_ExecutionStack.Peek(i);
 
-				var I = m_RootChunk.Code[c.Debug_EntryPoint];
-
-				string callname = I.OpCode == OpCode.Meta ? I.Name : null;
+				int ret = addressRelativeToBase
+					? c.ReturnAddress - m_RootChunk.FindChunkBase(c.ReturnAddress).BaseAddress
+					: c.ReturnAddress;
 
 				if (c.ClrFunction != null)
 				{
@@ -374,20 +374,27 @@ namespace MoonSharp.Interpreter.Execution.VM
 					{
 						Address = -1,
 						BasePtr = -1,
-						RetAddress = c.ReturnAddress,
+						RetAddress = ret,
+						Name = $"{c.ClrFunction.Name} (CLR)",
 						Location = startingRef,
-						Name = c.ClrFunction.Name
 					});
 				}
 				else
 				{
+					var I = m_RootChunk.Code[c.Debug_EntryPoint];
+					var cb = m_RootChunk.FindChunkBase(c.Debug_EntryPoint);
+
+					string location = (I.SourceCodeRef != null && !I.SourceCodeRef.IsBytecodeLocation)
+						? I.SourceCodeRef.FormatLocation(m_Script)
+						: $"({cb.Name}: {c.Debug_EntryPoint - m_RootChunk.FindChunkBase(c.Debug_EntryPoint).BaseAddress})";
+
 					wis.Add(new WatchItem()
 					{
-						Address = c.Debug_EntryPoint,
+						Address = addressRelativeToBase ? c.Debug_EntryPoint - cb.BaseAddress : c.Debug_EntryPoint,
 						BasePtr = c.BasePointer,
-						RetAddress = c.ReturnAddress,
-						Name = callname,
-						Location = startingRef,
+						RetAddress = ret,
+						Name = $"{(I.OpCode == OpCode.Meta ? I.Name : "<unknown>")} {location}",
+						Location = I.SourceCodeRef ?? startingRef,
 					});
 				}
 
@@ -397,12 +404,13 @@ namespace MoonSharp.Interpreter.Execution.VM
 				{
 					wis.Add(new WatchItem()
 					{
-						Name = c.Continuation.Name,
-						Location = SourceRef.GetClrLocation()
+						Address = -1,
+						BasePtr = -1,
+						RetAddress = c.ReturnAddress,
+						Name = $"{c.Continuation.Name} (CLR continuation)",
+						Location = SourceRef.GetClrLocation(),
 					});
 				}
-
-
 			}
 
 			return wis;

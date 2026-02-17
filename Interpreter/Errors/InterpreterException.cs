@@ -84,14 +84,13 @@ namespace MoonSharp.Interpreter
 					this.DecoratedMessage = this.Message;
 					return;
 				}
-				else if (sref != null)
+
+				if (sref != null)
 				{
-					this.DecoratedMessage = string.Format("{0}: {1}", sref.FormatLocation(script), this.Message);
+					this.DecoratedMessage = $"{sref.FormatLocationIP(script, ip)}: {this.Message}";
 				}
 				else
-				{
-					this.DecoratedMessage = string.Format("bytecode:{0}: {1}", ip, this.Message);
-				}
+					this.DecoratedMessage = $"{ip:X8}: {this.Message}";
 			}
 		}
 

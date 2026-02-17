@@ -28,7 +28,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 			ex.DecorateMessage(m_Script, sref, ip);
 
-			ex.CallStack = Debugger_GetCallStack(sref);
+			ex.CallStack = Debugger_GetCallStack(sref, true);
 		}
 
 

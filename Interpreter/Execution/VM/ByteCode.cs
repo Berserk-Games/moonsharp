@@ -9,14 +9,31 @@ using MoonSharp.Interpreter.Debugging;
 
 namespace MoonSharp.Interpreter.Execution.VM
 {
+	public class ChunkBase
+	{
+		public static readonly ChunkBase CLR = new ChunkBase(-1, false, "<CLR>");
+
+		internal ChunkBase(int baseAddress, bool bytecode, string name)
+		{
+			BaseAddress = baseAddress;
+			Name = name;
+			IsBytecode = false;
+		}
+
+		public readonly int BaseAddress;
+		public readonly bool IsBytecode;
+		public readonly string Name;
+	}
+	
 	internal class ByteCode : RefIdObject
 	{
-		public List<Instruction> Code = new List<Instruction>();
+		public List<Instruction> Code = new();
 		public Script Script { get; private set; }
-		private List<SourceRef> m_SourceRefStack = new List<SourceRef>();
+		private List<SourceRef> m_SourceRefStack = new();
 		private SourceRef m_CurrentSourceRef = null;
+		private List<ChunkBase> ChunkBases = new();
 
-		internal LoopTracker LoopTracker = new LoopTracker();
+		internal LoopTracker LoopTracker = new();
 
 		public ByteCode(Script script)
 		{
@@ -88,6 +105,34 @@ namespace MoonSharp.Interpreter.Execution.VM
 		public Instruction GetLastInstruction()
 		{
 			return Code[Code.Count - 1];
+		}
+
+		public int BeginChunk(string name, bool bytecode)
+		{
+			int baseAddress = GetJumpPointForNextInstruction();
+			ChunkBases.Add(new ChunkBase(baseAddress, bytecode, name));
+			return baseAddress;
+		}
+
+		public ChunkBase FindChunkBase(int addr)
+		{
+			if (addr < 0)
+				return ChunkBase.CLR;
+
+			int low = 0;
+			int high = ChunkBases.Count - 1;
+
+			while (low < high) {
+				int mid = low + (high - low) / 2;
+				if (addr < ChunkBases[mid].BaseAddress)
+					high = mid;
+				else
+					low = mid + 1;
+			}
+
+			if (addr < ChunkBases[low].BaseAddress) low--;
+
+			return ChunkBases[low];
 		}
 
 		private Instruction AppendInstruction(Instruction c)

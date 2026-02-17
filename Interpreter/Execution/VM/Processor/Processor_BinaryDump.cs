@@ -95,7 +95,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 		internal int Undump(Stream stream, int sourceID, Table envTable, out bool hasUpvalues)
 		{
 			int baseAddress = m_RootChunk.Code.Count;
-			SourceRef sourceRef = new SourceRef(sourceID, 0, 0, 0, 0, false);
+			SourceRef sourceRef = SourceRef.GetBytecodeLocation();
 
 			using (BinaryReader br = new BinDumpBinaryReader(stream, Encoding.UTF8))
 			{

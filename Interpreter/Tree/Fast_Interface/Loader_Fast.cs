@@ -56,10 +56,10 @@ namespace MoonSharp.Interpreter.Tree.Fast_Interface
 				//var srcref = new SourceRef(source.SourceID);
 
 				using (script.PerformanceStats.StartStopwatch(Diagnostics.PerformanceCounter.Compilation))
-				using (bytecode.EnterSource(null))
+				using (bytecode.EnterSource(new SourceRef(source.SourceID, 0, 0, 0, 0, false)))
 				{
 					bytecode.Emit_Nop(string.Format("Begin chunk {0}", source.Name));
-					beginIp = bytecode.GetJumpPointForLastInstruction();
+					beginIp = bytecode.BeginChunk(source.Name, false);
 					stat.Compile(bytecode);
 					bytecode.Emit_Nop(string.Format("End chunk {0}", source.Name));
 				}

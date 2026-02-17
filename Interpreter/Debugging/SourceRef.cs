@@ -1,4 +1,5 @@
 ﻿using System;
+using MoonSharp.Interpreter.Execution.VM;
 
 namespace MoonSharp.Interpreter.Debugging
 {
@@ -11,6 +12,10 @@ namespace MoonSharp.Interpreter.Debugging
 		/// Gets a value indicating whether this location is inside CLR .
 		/// </summary>
 		public bool IsClrLocation { get; private set; }
+		/// <summary>
+		/// Gets a value indicating whether this instance is a bytecode location
+		/// </summary>
+		public bool IsBytecodeLocation { get; private set; }
 
 		/// <summary>
 		/// Gets the index of the source.
@@ -49,6 +54,11 @@ namespace MoonSharp.Interpreter.Debugging
 		internal static SourceRef GetClrLocation()
 		{
 			return new SourceRef(0, 0, 0, 0, 0, false) { IsClrLocation = true };
+		}
+
+		internal static SourceRef GetBytecodeLocation()
+		{
+			return new SourceRef(0, 0, 0, 0, 0, false) { IsBytecodeLocation = true };
 		}
 
 		public SourceRef(SourceRef src, bool isStepStop)
@@ -184,23 +194,34 @@ namespace MoonSharp.Interpreter.Debugging
 
 			if (script.Options.UseLuaErrorLocations || forceClassicFormat)
 			{
-				return string.Format("{0}:{1}", sc.Name, this.FromLine);
+				return $"{sc.Name}:{this.FromLine}";
 			}
 			else if (this.FromLine == this.ToLine)
 			{
 				if (this.FromChar == this.ToChar)
 				{
-					return string.Format("{0}:({1},{2})", sc.Name, this.FromLine, this.FromChar, this.ToLine, this.ToChar);
+					return $"({sc.Name}: line {this.FromLine}, col {this.FromChar})";
 				}
 				else
 				{
-					return string.Format("{0}:({1},{2}-{4})", sc.Name, this.FromLine, this.FromChar, this.ToLine, this.ToChar);
+					return $"({sc.Name}: line {this.FromLine}, cols {this.FromChar}-{this.ToChar})";
 				}
 			}
 			else
 			{
-				return string.Format("{0}:({1},{2}-{3},{4})", sc.Name, this.FromLine, this.FromChar, this.ToLine, this.ToChar);
+				return $"({sc.Name}: line {this.FromLine}, col {this.FromChar} - line {this.ToLine}, col{this.ToChar})";
 			}
+		}
+
+		internal string FormatLocationIP(Script script, int ip)
+		{
+			if (this.IsBytecodeLocation)
+			{
+				ChunkBase cb = script.m_ByteCode.FindChunkBase(ip);
+				return $"({cb.Name}: {ip - cb.BaseAddress:X8})";
+			}
+			
+			return this.FormatLocation(script);
 		}
 	}
 }

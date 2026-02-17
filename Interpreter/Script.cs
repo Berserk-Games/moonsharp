@@ -31,7 +31,7 @@ namespace MoonSharp.Interpreter
 		public const string LUA_VERSION = "5.2";
 
 		Processor m_MainProcessor = null;
-		ByteCode m_ByteCode;
+		internal ByteCode m_ByteCode;
 		List<SourceCode> m_Sources = new List<SourceCode>();
 		Table m_GlobalTable;
 		IDebugger m_Debugger;
@@ -214,15 +214,16 @@ namespace MoonSharp.Interpreter
 			}
 			else
 			{
-				string chunkName = string.Format("{0}", codeFriendlyName ?? "dump_" + m_Sources.Count.ToString());
+				string chunkName = codeFriendlyName ?? "dump_" + m_Sources.Count.ToString();
 
 				SourceCode source = new SourceCode(codeFriendlyName ?? chunkName,
-					string.Format("-- This script was decoded from a binary dump - dump_{0}", m_Sources.Count),
+					$"-- This script was decoded from a binary dump - {chunkName}",
 					m_Sources.Count, this);
 
 				m_Sources.Add(source);
 
 				bool hasUpvalues;
+				m_ByteCode.BeginChunk(chunkName, true);
 				int address = m_MainProcessor.Undump(codeStream, m_Sources.Count - 1, globalTable ?? m_GlobalTable, out hasUpvalues);
 
 				SignalSourceCodeChange(source);
