@@ -1200,6 +1200,12 @@ namespace MoonSharp.Interpreter.Execution.VM
 			tbl.Table.Set(key, val.ToScalar());
 		}
 
+		/// <summary>
+		/// continuation to use to quickly just remove the return value.
+		/// do not use this unless there is a second value below the return value
+		/// </summary>
+		private CallbackFunction m_RemoveReturn;
+
 		private int ExecIndexSet(Instruction i, int instructionPtr)
 		{
 			int nestedMetaOps = 100; // sanity check, to avoid potential infinite loop here
@@ -1267,7 +1273,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 					m_ValueStack.Push(obj);
 					m_ValueStack.Push(idx);
 					m_ValueStack.Push(value);
-					return Internal_ExecCall(3, instructionPtr);
+					return Internal_ExecCall(3, instructionPtr, continuation: m_RemoveReturn);
 				}
 				else
 				{

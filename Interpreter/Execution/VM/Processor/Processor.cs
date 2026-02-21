@@ -32,6 +32,11 @@ namespace MoonSharp.Interpreter.Execution.VM
 			m_Script = script;
 			m_State = CoroutineState.Main;
 			DynValue.NewCoroutine(new Coroutine(this)); // creates an associated coroutine for the main processor
+
+			// the RET instruction sees that there's a continuation, pops the return value off the stack,
+			// calls the continuation, then pushes the continuation's return value onto the stack
+			// this is somewhat of a hack, language pops return value, we pop next value, RET pushes next value back
+			m_RemoveReturn = new CallbackFunction((_, _) => m_ValueStack.Pop());
 		}
 
 		private Processor(Processor parentProcessor)
@@ -42,6 +47,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 			m_Script = parentProcessor.m_Script;
 			m_Parent = parentProcessor;
 			m_State = CoroutineState.NotStarted;
+			m_RemoveReturn = parentProcessor.m_RemoveReturn;
 		}
 
 
